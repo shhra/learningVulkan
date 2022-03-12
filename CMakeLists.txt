@@ -10,7 +10,6 @@ include_directories(include)
 add_executable(graphics
     src/main.cpp
     src/base.hpp
-
-    )
+)
 
 target_link_libraries(graphics glfw ${GLFW_LIBRARIES} vulkan ${VULKAN_LIBRARIES})
