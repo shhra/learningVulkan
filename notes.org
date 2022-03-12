@@ -1,0 +1,67 @@
+#+TITLE: Vulkan Notes
+#+STARTUP: overview
+
+*  Glfw
+  * re-sizable isn't straightforward.
+  * disable GL api call
+
+* Instance
+1. Connection between application and vulkan library.
+2. Reveals application details to the driver.
+3. =VkInstance=:
+   - Write note about it.
+     * So far, is a object of type instance.
+4. =VkApplicationInfo=
+   * Data about the application
+   * Optional data.
+   * Useful for optimization.
+   * The =sType= is specified explicitly.
+   * =pNext= is a pointer to extension. (Left =nullptr= initially)
+5. =VkInstanceCreateInfo=
+   * required
+   * Tells driver about global extension and validation layers
+6. Extension
+   * Vulkan requires being explicit about extension for window system.
+7. =VkResult=
+   * Returned by =vkCreateInstance=.
+   * =VK_SUCCESS= or some result.
+8. General Pattern for object Creation
+   a. Pointer to struct with creation info
+   b. Pointer to custom allocator callbacks
+   c. Pointer to variable that stores the handle to new object.
+
+** TODO As a challenge, try to create a function that checks if all of the extensions returned by =glfwGetRequiredInstanceExtensions= are included in the supported extensions list.
+* Validation Layer
+- The driver doesn't care about resources and type errors. Therefore, everything boils down to the programmer for correct behavior.
+- These features gets hooked into function calls with intent to apply additional operations.
+- Logging, Resource Leakage, Sanitization, Profiling, Replaying, Checking threads etc.
+- Only available with Vulkan SDK
+- Types:
+  * Instance specific (Applied to Vulkan calls)
+  * Device specific (Deprecated)
+** Using it
+1. Given by standard SDK.
+2. Using =vkEnumerateInstanceLayerProperties= identical to =vkEnumerateInstanceExtensionProperties=, list the available layers
+** Message Callback
+- The error messages can be explicitly handled.
+- Allows to fine tune with the error message. Good for making decisions early on.
+- Add debug utils extension on the vulkan.
+*** Creating a debug call function.
+- =VKAPI_ATTR= and =VKAPI_CALL= are there to ensure the correct function signature.
+- Severity Flags:
+  * =VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT=: Diagnostic message
+  * =VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT=: Informational message like the creation of a resource
+  * =VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT=: Message about behavior that is not necessarily an error, but very likely a bug in your application
+  * =VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT=: Message about behavior that is invalid and may cause crashes
+- Message Types
+  * =VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT=: Some event has happened that is unrelated to the specification or performance
+  * =VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT=: Something has happened that violates the specification or indicates a possible mistake
+  * =VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT=: Potential non-optimal use of Vulkan
+- Callback Data
+  * =pMessage=: The debug message as a null-terminated string
+  * =pObjects=: Array of Vulkan object handles related to the message
+  * =objectCount=: Number of objects in array
+*** Creating debug extension
+- This doesn't get loaded by default.
+- Therefore manual search is necessary. Do it using =vkGetInstanceProcAddr=
+- Create it and call the function
