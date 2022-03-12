@@ -1,7 +1,5 @@
 #include <cstdlib>
 #include <exception>
-#define GLFW_INCLUDE_VULKAN
-#include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
 #include "base.hpp"
 
@@ -10,7 +8,7 @@
 
 int main() {
 
-  VkApp app;
+  App::VkApp app;
   try {
     app.run();
   } catch (std::exception& e) {
