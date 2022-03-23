@@ -1,7 +1,7 @@
 #+TITLE: Vulkan Notes
 #+STARTUP: overview
 
-*  Glfw
+* Glfw
   * re-sizable isn't straightforward.
   * disable GL api call
 
@@ -65,3 +65,46 @@
 - This doesn't get loaded by default.
 - Therefore manual search is necessary. Do it using =vkGetInstanceProcAddr=
 - Create it and call the function
+- The message extension must be destroyed before destroying the instance.
+- Understand what it means to separate these things.
+** More information on: vulkan sdk/config/vk_layer_settings.txt
+* Physical device
+** Select the graphics
+- There are wide features available in the vulkan library. Therefore it is
+  required to select the appropriate graphics cards.
+** Usage
+1. Tutorial assumes to use only single graphics card, but multiple can be used
+   simultaneously.
+2. Destroy a physical device handle when the instance is deleted.
+** Picking a device
+1. Enumerate the available devices using =vkEnumeratePhysicalDevices=.
+2. Exit the process if no device is available.
+3. Hold the device handles and check if the  device is suitable.
+4. If it is suitable pick it.
+5. If there aren't any device, we throw error.
+** Checking if a device is suitable.
+1. We can query for the device properties using =vkGetPhysicalDeviceProperties=.
+2. In case we want a GPU to have a geometry shader, we can if the property is
+   present or not.
+   #+begin_src cpp
+  bool isSuitableExample(const VkPhysicalDevice &device) {
+    // This can include complex logics. For this tutorial we return true as soon
+    // as we get a device.
+    VkPhysicalDeviceProperties props;
+    VkPhysicalDeviceFeatures feats;
+
+    vkGetPhysicalDeviceProperties(device, &props);
+    vkGetPhysicalDeviceFeatures(device, &feats);
+
+    return props.deviceType == VK_PHYSICAL_DEVICE_TYPE_INTEGRATED_GPU ||
+           feats.geometryShader;
+  }
+   #+end_src
+3. Another way is to create a rating system that attaches the score based on the
+   available features. This is useful when considering how to handle the devices.
+** Queue Families
+1. Each queue allows only a subset of commands.
+2. Therefore we need to check the type of queues supported by device and
+   as per our requirement.
+3. Query the queue family properties and then select the queue that supports
+   graphics bit.

@@ -10,6 +10,7 @@ include_directories(include)
 add_executable(graphics
     src/main.cpp
     src/base.hpp
+    src/device.hpp
     src/settings.hpp
     src/messages.hpp
 )
