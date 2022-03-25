@@ -13,9 +13,9 @@
 #include <stdexcept>
 
 // Get the EXIT_SUCCESS and EXIT_FAILURE macros
+#include "device.hpp"
 #include "messages.hpp"
 #include "settings.hpp"
-#include "device.hpp"
 #include <cstdlib>
 
 // This is a typical vulkan application where vulkan objects are stored.
@@ -46,7 +46,8 @@ private:
   void initContext() {
     createInstance();
     setupDebugMessenger();
-    device.pickPhysical(instance);
+    physicalDevice.pick(instance);
+    device.createLogicalDevice(physicalDevice);
   }
 
   // Update the graphical elements.
@@ -62,6 +63,7 @@ private:
     if (enableValidationLayers) {
       Messages::destroyDebugMsgExt(instance, debugMessenger, nullptr);
     }
+    device.clean();
     vkDestroyInstance(instance, nullptr);
     glfwDestroyWindow(window);
     glfwTerminate();
@@ -100,7 +102,7 @@ private:
       createInfo.ppEnabledLayerNames = validationLayers.data();
 
       Messages::populate(dbgCreateInfo);
-      createInfo.pNext = (VkDebugUtilsMessengerCreateInfoEXT*) &dbgCreateInfo;
+      createInfo.pNext = (VkDebugUtilsMessengerCreateInfoEXT *)&dbgCreateInfo;
     } else {
       createInfo.enabledLayerCount = 0;
       createInfo.pNext = nullptr;
@@ -128,7 +130,8 @@ private:
   GLFWwindow *window;
   VkInstance instance;
   VkDebugUtilsMessengerEXT debugMessenger;
-  Device device;
+  PhysicalDevice physicalDevice;
+  LogicalDevice device;
 };
 
 } // namespace App

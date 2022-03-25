@@ -108,3 +108,21 @@
    as per our requirement.
 3. Query the queue family properties and then select the queue that supports
    graphics bit.
+* Logical Device
+ 1. Start by creating a =VkDevice=
+** Initialize =VkDeviceQueueCreateInfo=
+1. As with physical device, one has to decide the queue type for this device too.
+   This queue info belongs to the actual physical device.
+2. We do not need more queues: Reason command buffers, multiple threads and synchronize.
+3. However we can influence the scheduling in the queues.
+4. Required even for single queue. $0.0 \leq \text{priority} \leq 1.0$.
+** Select physical device features =VkPhysicalDeviceFeatures=
+1. Once features are ready, we are going to select features. (In tutorial at this stage it is false. )
+*** Updates:
+** Finally create logical device:
+1. Use =VkDeviceCreateInfo=
+2. There are certain compatibility factors. Those are ignored.
+3. To create pass it requires physical device, create info and the logical device.
+** When exiting, delete the device.
+** Queue
+When vulkan creates logical device, a queue is also created. But there won't be interface to access it. Therefore, remember to create the interface.

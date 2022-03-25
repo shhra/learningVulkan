@@ -14,9 +14,14 @@ struct QueueFamilyIndices {
   bool isComplete() { return graphicsFamily.has_value(); }
 };
 
-class Device {
+/**
+ * This setups the physical device. This is actual graphics card that is
+ * available on the system. With vulkan we can score the quality of graphics
+ * card and select one that suits our needs.
+ * */
+class PhysicalDevice {
 public:
-  void pickPhysical(const VkInstance &instance) {
+  void pick(const VkInstance &instance) {
     uint32_t deviceCount = 0;
     vkEnumeratePhysicalDevices(instance, &deviceCount, nullptr);
     if (deviceCount == 0) {
@@ -37,6 +42,18 @@ public:
       throw std::runtime_error(
           "[VkDevice]: We can't proceed if you don't have a GPU.");
     }
+  }
+
+  QueueFamilyIndices findQueueFamilies() {
+    return findQueueFamilies(this->physicalDevice);
+  }
+
+  void instantiateLogical(VkDeviceCreateInfo &info, VkDevice &logical) {
+    if (vkCreateDevice(this->physicalDevice, &info, nullptr, &logical) !=
+        VK_SUCCESS) {
+      throw std::runtime_error("[VkDevice]: Logical device...... denied.");
+    }
+    std::cout << "[VkDevice]: You now have a logical device." << std::endl;
   }
 
 private:
@@ -68,6 +85,45 @@ private:
 
     return indices;
   }
+};
+
+class LogicalDevice {
+public:
+  void createLogicalDevice(PhysicalDevice &physicalDevice) {
+    QueueFamilyIndices indices = physicalDevice.findQueueFamilies();
+
+    /* Queue information. */
+    VkDeviceQueueCreateInfo queueCreateInfo{};
+    queueCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
+    queueCreateInfo.queueFamilyIndex = indices.graphicsFamily.value();
+    queueCreateInfo.queueCount = 1;
+    float queuePriority = 1.0f;
+    queueCreateInfo.pQueuePriorities = &queuePriority;
+
+    /* Device features. */
+    VkPhysicalDeviceFeatures deviceFeatures{};
+
+    /* Logical device */
+    VkDeviceCreateInfo createInfo{};
+    createInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
+    createInfo.pQueueCreateInfos = &queueCreateInfo;
+    createInfo.queueCreateInfoCount = 1;
+    createInfo.pEnabledFeatures = &deviceFeatures;
+
+    /* Instantiate the logical deivce. */
+    physicalDevice.instantiateLogical(createInfo, device);
+
+    /* Get the queue */
+    vkGetDeviceQueue(device, indices.graphicsFamily.value(), 0, &graphicsQueue);
+  }
+
+  VkQueue &queue() { return this->graphicsQueue; }
+
+  void clean() { vkDestroyDevice(device, nullptr); }
+
+private:
+  VkDevice device;
+  VkQueue graphicsQueue;
 };
 
 #endif // DEVICE_H_
