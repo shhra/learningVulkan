@@ -37,7 +37,6 @@ private:
   // This adds glfw window.
   void initWindow() {
     glfwInit();
-
     glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
     glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
     window = glfwCreateWindow(WIDTH, HEIGHT, "explorer", nullptr, nullptr);
@@ -46,8 +45,9 @@ private:
   void initContext() {
     createInstance();
     setupDebugMessenger();
-    physicalDevice.pick(instance);
-    device.createLogicalDevice(physicalDevice);
+    createSurface();
+    physicalDevice.pick(instance, surface);
+    device.createLogicalDevice(physicalDevice, surface);
   }
 
   // Update the graphical elements.
@@ -64,6 +64,7 @@ private:
       Messages::destroyDebugMsgExt(instance, debugMessenger, nullptr);
     }
     device.clean();
+    vkDestroySurfaceKHR(instance, surface, nullptr);
     vkDestroyInstance(instance, nullptr);
     glfwDestroyWindow(window);
     glfwTerminate();
@@ -113,6 +114,13 @@ private:
     }
   }
 
+  void createSurface() {
+    if (glfwCreateWindowSurface(instance, window, nullptr, &surface) !=
+        VK_SUCCESS) {
+      throw std::runtime_error("[VkApp]: Surface denied...., must need one.!");
+    }
+  }
+
   void setupDebugMessenger() {
     if (!enableValidationLayers)
       return;
@@ -129,6 +137,7 @@ private:
   // Window context
   GLFWwindow *window;
   VkInstance instance;
+  VkSurfaceKHR surface;
   VkDebugUtilsMessengerEXT debugMessenger;
   PhysicalDevice physicalDevice;
   LogicalDevice device;

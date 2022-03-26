@@ -126,3 +126,16 @@
 ** When exiting, delete the device.
 ** Queue
 When vulkan creates logical device, a queue is also created. But there won't be interface to access it. Therefore, remember to create the interface.
+
+* Window surface
+** Surface Creation
+Use =glfwCreateWindowSruface= to create platform agnostic surface. Surfaces are generally created after messages.
+** Presentation support
+1. Not all device may be suitable for presentation. Therefore, only take devices that can present.
+2. There can be different queue family to support for drawing commands and support for presentation commands.
+3. Therefore, device creation should check for the presentation support too.
+4. It can happen that both of the queue may end up being same.
+** Presentation Queue
+1. Logical device will need a presentation queue.
+2. Easy way is to use a set to create the queue.
+3. Once we have the set, we iterate through the set and create multiple queue info.
