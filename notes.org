@@ -198,3 +198,13 @@ struct VkSurfaceFormatKHR {
 10. Finally create the swap chain.
 ** Retriving images.
 1. Create a vector of =VkImage= and follow the two function call routine!
+* Image Views
+1. =VkImage= requires =VkImageView= for rendering. It is an option to view the  image. Describes how the image is accessed and which part of the image to access.
+2. Create a vector to hold image views.
+3. To create a image view
+   - Allocate size of  the =swapChainImagesViews=
+   - Then use =VkImageViewCreateInfo=
+4. =viewType= specify 1D, 2D, 3D textures or cube map.
+5. =components=: Allow to swizzle the images.
+6. =subresourceRange= describe the image's purpose and part to access. It can also include mipmaps
+ 7. Destroy the image views.
