@@ -14,6 +14,7 @@ add_executable(graphics
     src/settings.hpp
     src/messages.hpp
     src/swapchain.hpp
+    src/pipeline.hpp
 )
 
 target_link_libraries(graphics glfw ${GLFW_LIBRARIES} vulkan ${VULKAN_LIBRARIES})

@@ -1,6 +1,7 @@
 #ifndef BASE_H_
 #define BASE_H_
 
+#include "pipeline.hpp"
 #include "swapchain.hpp"
 #include <cstddef>
 #include <cstdint>
@@ -54,6 +55,7 @@ private:
                       &swapChain, swapChainImages, swapChainImageFormat,
                       swapChainExtent);
     createImageViews();
+    Pipeline::create(device.get());
   }
 
   // Update the graphical elements.
@@ -76,6 +78,8 @@ private:
     device.clean();
     vkDestroySurfaceKHR(instance, surface, nullptr);
     vkDestroyInstance(instance, nullptr);
+    vkDestroyShaderModule(device, fragShaderModule, nullptr);
+    vkDestroyShaderModule(device, vertShaderModule, nullptr);
     glfwDestroyWindow(window);
     glfwTerminate();
   }

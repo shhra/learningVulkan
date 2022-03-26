@@ -208,3 +208,24 @@ struct VkSurfaceFormatKHR {
 5. =components=: Allow to swizzle the images.
 6. =subresourceRange= describe the image's purpose and part to access. It can also include mipmaps
  7. Destroy the image views.
+* Render pipeline
+1. Input assembler
+2. Vertex shader
+3. Tessellation shader
+4. Geometry shader
+5. Rasterization
+6. Fragment shader
+7. Color blending
+* Shaders
+1. Vulkan requires shader in SPIR-V format.
+2. Therefore, it will requires loading a binary.
+** Shader Modules
+1. =VkShaderModule= wraps shader to pass through the pipeline
+2. Creating is simple. Requires pointer to buffer + length
+3. Specified in =VkShaderModuleCreateInfo=
+3. Shademodules are destroyed at the end of function.
+** =VkPipelineShaderStageCreateInfo=
+1. It assigns shaders to a pipeline stage .
+2. =module= contains the vertex shader module (shader code)
+3. =pName= contains the entry to the vertex shader.
+4. =pSpecializationInfo= allows specifying constants. Therefore we can create multiple pipelines using same shader module. (helps compiler optimize the stuff.)
