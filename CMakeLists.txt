@@ -13,6 +13,7 @@ add_executable(graphics
     src/device.hpp
     src/settings.hpp
     src/messages.hpp
+    src/swapchain.hpp
 )
 
 target_link_libraries(graphics glfw ${GLFW_LIBRARIES} vulkan ${VULKAN_LIBRARIES})

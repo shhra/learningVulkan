@@ -20,7 +20,7 @@ struct Messages {
     } else if (messageSeverity >=
                VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT) {
       // Only show critical message.
-      std::cerr << "[Message]: Validation says...  " << pCallbackData->pMessage
+      std::cerr << "[VkMessage]: Validation says...  " << pCallbackData->pMessage
                 << std::endl;
     }
     return VK_FALSE;

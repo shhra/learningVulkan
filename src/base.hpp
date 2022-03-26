@@ -1,8 +1,10 @@
 #ifndef BASE_H_
 #define BASE_H_
 
+#include "swapchain.hpp"
 #include <cstddef>
 #include <cstdint>
+#include <vector>
 #include <vulkan/vulkan.hpp>
 #include <vulkan/vulkan_core.h>
 #define GLFW_INCLUDE_VULKAN
@@ -48,6 +50,9 @@ private:
     createSurface();
     physicalDevice.pick(instance, surface);
     device.createLogicalDevice(physicalDevice, surface);
+    SwapChain::create(window, physicalDevice.get(), surface, device.get(),
+                      &swapChain, swapChainImages, swapChainImageFormat,
+                      swapChainExtent);
   }
 
   // Update the graphical elements.
@@ -60,6 +65,7 @@ private:
 
   // Free the allocated resources
   void clean() {
+    vkDestroySwapchainKHR(device.get(), swapChain, nullptr);
     if (enableValidationLayers) {
       Messages::destroyDebugMsgExt(instance, debugMessenger, nullptr);
     }
@@ -141,6 +147,12 @@ private:
   VkDebugUtilsMessengerEXT debugMessenger;
   PhysicalDevice physicalDevice;
   LogicalDevice device;
+  VkSwapchainKHR swapChain;
+
+  // Swap chain related.
+  std::vector<VkImage> swapChainImages;
+  VkFormat swapChainImageFormat;
+  VkExtent2D swapChainExtent;
 };
 
 } // namespace App

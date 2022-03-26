@@ -139,3 +139,62 @@ Use =glfwCreateWindowSruface= to create platform agnostic surface. Surfaces are 
 1. Logical device will need a presentation queue.
 2. Easy way is to use a set to create the queue.
 3. Once we have the set, we iterate through the set and create multiple queue info.
+* Swap Chain
+1. Without default framebuffer, it is our responsibility to create buffers that can render our data.
+2. /Swap Chain/ handles this infrastructure.
+3. Queue of images waiting to pop up on screen.
+4. Synchronize presentation of images with refresh rate.
+** Check swap chain
+1. Vulkan core doesn't support swap chain. It comes from extension.
+2. Therefore, device should be able to support the swap chain.
+3. First check if the device supports the swap chain extension or not!
+4. Having a presentation queue => swap chain must be supported.
+5. This two time checking is a good to have stuff.
+** Making swap chain work at it's best.
+1. Checking if swap-chain is available isn't sufficient.
+2. It required details
+   - Basic surface capabilities
+   - Surface formats
+   - Available present mode.
+** =VkSurfaceCapabilitiesKHR=
+1. Querying functions have =VkPhysicalDevice= and =VkSurfaceKHR=. (Core part of swap chain)
+2. Notice that vulkan has this thing of doing two function calls. First to get the count and second to fill the list. This is used for knowing the format.
+3. Once all the details are fetch, make sure the device is suitable
+** Choosing right settings.
+1. There are can different color depth, presentation mode and resolution of image in swap chain.
+*** Surface Format
+#+begin_src C
+struct VkSurfaceFormatKHR {
+  VkFormat format; // Specifies color channels and types
+  VkColorSpaceKHR colorSpace; // Indicates if SRGB space is supported or not.
+};
+#+end_src
+*** Presentation Mode;
+1. It is important because contents are shown here.
+1. Possible modes:
+   i. =VK_PRESENT_MODE_IMMEDIATE_KHR=: directly to screen.
+   i. =VK_PRESENT_MODE_FIFO_KHR=: A queue. Display takes an image from front of queue and program inserts rendered image back on the queue. /vertical blank/ = refresh the display.
+   i. =VK_PRESENT_MODE_FIFO_RELAXED_KHR=:
+   i. =VK_PRESENT_MODE_MAILBOX_KHR=:
+*** Swap extent.
+1. Resolution of swap chain.
+2. Almost equal to window res.
+3. Match resolution of window setting width/height.
+4. Pick resolution that matches =minImageExtent= and =maxImageExtent= bounds.
+5. Vulkan uses pixels and screen coordinates.
+** Creating Swap chain
+1. Select all the parameters above.
+2. Determine number of images in swap chain.
+3. =imageArrayLayers= specifies amount of layers each image consists.
+4. =imageUsage= specifies kind of operations in swap chain.  This is where you can render to different places for post processing.
+5. Specify how to handle swap chains.
+   - =VK_SHARING_MODE_EXCLUSIVE=: one queue family owns one image. Best perf.
+   - =VK_SHARING_MODE_CONCURRENT=: Across multiple queues without ownership.
+     Concurrent mode requires to specify in advance between which queue families ownership will be shared using the =queueFamilyIndexCount= and =pQueueFamilyIndices= parameters.
+6. Swap chain can have different image transforms.
+7. =compositeAlpha= specifies alpha blending.
+8. =clipped= clips away the information. But can be used in predictive things.
+9. =oldSwapChain=: Complex topic.
+10. Finally create the swap chain.
+** Retriving images.
+1. Create a vector of =VkImage= and follow the two function call routine!
