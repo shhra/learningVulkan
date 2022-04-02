@@ -298,3 +298,12 @@ struct VkSurfaceFormatKHR {
 ** Renderpass
 - =VkRenderPass= contains the renderpass.
 - It is a structure that can be filled with different option.
+* Frame Buffers
+1. Attachments are bound by wraping into Framebuffers.
+2. =VkFrameBuffer= is a framebuffer object that references all of =VkImageView= objects that represent the attachments.
+3. The swap chain returns an image for presentation. This image gets attached to framebuffer.
+4. Each image will have their own frambuffers? WTH!
+5. Creation is easy
+   - Requires renderpass
+   - Image view as attachments.
+   - width and height.

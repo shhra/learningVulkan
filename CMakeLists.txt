@@ -15,6 +15,7 @@ add_executable(graphics
     src/messages.hpp
     src/swapchain.hpp
     src/renderpass.hpp
+    src/buffers.hpp
     src/pipeline.hpp
 )
 

@@ -1,6 +1,7 @@
 #ifndef BASE_H_
 #define BASE_H_
 
+#include "buffers.hpp"
 #include "pipeline.hpp"
 #include "renderpass.hpp"
 #include "swapchain.hpp"
@@ -59,6 +60,8 @@ private:
     RenderPass::create(device.get(), swapChainImageFormat, renderPass);
     Pipeline::create(device.get(), swapChainExtent, pipelineLayout, renderPass,
                      graphicsPipeline);
+    FrameBuffers::create(device.get(), renderPass, swapChainFramebuffers,
+                         swapChainImageViews, swapChainExtent);
   }
 
   // Update the graphical elements.
@@ -71,6 +74,7 @@ private:
 
   // Free the allocated resources
   void clean() {
+    FrameBuffers::clean(device.get(), swapChainFramebuffers);
     Pipeline::clean(device.get(), pipelineLayout, graphicsPipeline);
     RenderPass::clean(device.get(), renderPass);
     for (auto imageView : swapChainImageViews) {
@@ -193,6 +197,7 @@ private:
   // Swap chain related.
   std::vector<VkImage> swapChainImages;
   std::vector<VkImageView> swapChainImageViews;
+  std::vector<VkFramebuffer> swapChainFramebuffers;
   VkFormat swapChainImageFormat;
   VkExtent2D swapChainExtent;
   VkPipelineLayout pipelineLayout;
