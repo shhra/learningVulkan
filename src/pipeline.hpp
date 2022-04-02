@@ -28,7 +28,8 @@ struct Pipeline {
   }
 
   static void create(const VkDevice &device, const VkExtent2D &swapChainExtent,
-                     VkPipelineLayout &pipelineLayout) {
+                     VkPipelineLayout &pipelineLayout, VkRenderPass &renderPass,
+                     VkPipeline &graphicsPipeline) {
     auto vertexShader = readFile(std::filesystem::path("../shaders/vert.spv"));
     auto fragShader = readFile(std::filesystem::path("../shaders/frag.spv"));
 
@@ -131,6 +132,18 @@ struct Pipeline {
     colorBlendAttachment.dstAlphaBlendFactor = VK_BLEND_FACTOR_ZERO; // Optional
     colorBlendAttachment.alphaBlendOp = VK_BLEND_OP_ADD;             //
 
+    VkPipelineColorBlendStateCreateInfo colorBlending{};
+    colorBlending.sType =
+        VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
+    colorBlending.logicOpEnable = VK_FALSE;
+    colorBlending.logicOp = VK_LOGIC_OP_COPY;
+    colorBlending.attachmentCount = 1;
+    colorBlending.pAttachments = &colorBlendAttachment;
+    colorBlending.blendConstants[0] = 0.0f;
+    colorBlending.blendConstants[1] = 0.0f;
+    colorBlending.blendConstants[2] = 0.0f;
+    colorBlending.blendConstants[3] = 0.0f;
+
     /* Dynamic state */
     std::vector<VkDynamicState> dynamicStates = {VK_DYNAMIC_STATE_VIEWPORT,
                                                  VK_DYNAMIC_STATE_LINE_WIDTH};
@@ -151,7 +164,33 @@ struct Pipeline {
 
     if (vkCreatePipelineLayout(device, &pipelineLayoutInfo, nullptr,
                                &pipelineLayout) != VK_SUCCESS) {
-      throw std::runtime_error("failed to create pipeline layout!");
+      throw std::runtime_error(
+          "[VkPipeline]: I tried, okay? But I can't create pipeline at all.!");
+    }
+
+    /* Finally create Graphics pipeline*/
+    VkGraphicsPipelineCreateInfo pipelineInfo{};
+    pipelineInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
+    pipelineInfo.stageCount = 2;
+    pipelineInfo.pStages = shaderStages;
+
+    pipelineInfo.pVertexInputState = &vertexInputInfo;
+    pipelineInfo.pInputAssemblyState = &inputAssembly;
+    pipelineInfo.pViewportState = &viewportState;
+    pipelineInfo.pRasterizationState = &rasterizer;
+    pipelineInfo.pMultisampleState = &multisampling;
+    pipelineInfo.pDynamicState = &dynamicState;
+    pipelineInfo.pColorBlendState = &colorBlending;
+    pipelineInfo.layout = pipelineLayout;
+    pipelineInfo.renderPass = renderPass;
+    pipelineInfo.subpass = 0;
+    pipelineInfo.basePipelineHandle = VK_NULL_HANDLE;
+
+    if (vkCreateGraphicsPipelines(device, VK_NULL_HANDLE, 1, &pipelineInfo,
+                                  nullptr, &graphicsPipeline) != VK_SUCCESS) {
+      throw std::runtime_error(
+          "[VkPipeline]: My guts tell me that graphics pipeline creation "
+          "failed delightfully. Goodluck debugging.");
     }
 
     /* For some reason shader modules are immediately deleted at the end of
@@ -176,7 +215,9 @@ struct Pipeline {
     return shaderModule;
   }
 
-  static void clean(const VkDevice &device, VkPipelineLayout &layout) {
+  static void clean(const VkDevice &device, VkPipelineLayout &layout,
+                    VkPipeline &graphicsPipeline) {
+    vkDestroyPipeline(device, graphicsPipeline, nullptr);
     vkDestroyPipelineLayout(device, layout, nullptr);
   }
 };

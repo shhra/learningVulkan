@@ -264,4 +264,37 @@ struct VkSurfaceFormatKHR {
 ** Pipeline layout
 - =uniform= are configured with =VkPipelineLayout=
 - uniforms are passed into pipeline layout when creating them.
-* Render passeS
+* Render passes
+- Vulkan needs to know about framebuffer attachments.
+- These are properties like number of color buffer, depth buffer.
+- Sampling properties.
+- How to handle contents.
+- This exists before GraphicsPipeline.
+** Attachment description
+- Single color buffer attachment atm.
+- =format= should match that of swap chain.
+- =loadOp=: Determine what to do with data before rendering
+  * =VK_ATTACHMENT_LOAD_OP_LOAD=: Preserve the existing contents of the attachment
+  * =VK_ATTACHMENT_LOAD_OP_CLEAR=: Clear the values to a constant at the start
+  * =VK_ATTACHMENT_LOAD_OP_DONT_CARE=: Existing contents are undefined; we don't care about them
+- =storeOp=: Determine what to do with data after rendering
+  * =VK_ATTACHMENT_STORE_OP_STORE=: Rendered contents will be stored in memory and can be read later
+  * =VK_ATTACHMENT_STORE_OP_DONT_CARE=: Contents of the framebuffer will be undefined after the rendering operation
+- If sentcil buffer isn't useful we can discard it.
+- =VkImage= can represent texture and framebuffers
+  * =initalLayout= specifies layout before render pass
+  * =finalLayout= specifies layout to automatically transition when render pass finishes.
+    Depending on the value of these fields, we can get different behaviors.
+** Subpasses and attachment References
+- Single render pass can have multiple subpasses.
+- Subpasses depend upon he content of framebuffers in previous passes.
+- Postprocessing are subpasses.
+- Subpasses references the attachments which are =VkAttachmentReference=
+- =attachment= is the index in attachment description array. One attachment therefore 0.
+- =layout= specifies the layout for this subpass.
+- Subpass is created using =VkSubpassDescroption=.
+- This index is referenced from the fragment shader using =layout(location = 0)=
+- There are different attachments that can be referenced.
+** Renderpass
+- =VkRenderPass= contains the renderpass.
+- It is a structure that can be filled with different option.
