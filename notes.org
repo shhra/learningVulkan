@@ -229,3 +229,39 @@ struct VkSurfaceFormatKHR {
 2. =module= contains the vertex shader module (shader code)
 3. =pName= contains the entry to the vertex shader.
 4. =pSpecializationInfo= allows specifying constants. Therefore we can create multiple pipelines using same shader module. (helps compiler optimize the stuff.)
+* Fixed functions
+** Vertex Input
+- Use =VkPipelineVertexInputStateCreateInfo= to pass format of vertex data.
+- It consists /bindings/: Spacing between data, and type of data (per-vertex/per-instance)
+- /Attribute descriptions/: type of attributes passed to vertex shader, binding and offset
+- More on it later.
+** Input Assembly
+- =VkPipelineInputAssemblyStateCreateInfo=
+  * Geometry to be drawn
+  * Primitive restart? What is it? > allows breaking up the topology in =_STRIP=)
+  * Index vs element buffer (same as open gl where we pass the index.)
+** Viewports & Scissors
+- Region of frame-buffer where output is rendered to. (like GL)
+- Scissors define region where pixel will be stored.
+- Scissors > Viewport can give full image
+- Combine into =VkPipelineViewportStateCreateInfo=
+** Rasterizer
+- Performs depth testing, face culling and scissor test.
+- polygon vs edge.
+- =depthClampEnable= = True, fragments are clamped to space between near and far planes. These do not discard them.
+- =rasterizerDiscardEnable= allows to discard geometry before it goes to rasterization.
+- =polygonMode=: Fill, line, or point
+** Multipsampling
+- Free antialiasing.
+- Occurs along the edge.
+** Color blending
+- Combine with color in framebuffer
+- Mix old + new
+- Combine using bit operation
+- Tutorial has better method too.
+** Dynamic state
+- Something can be changed on the fly without creating pipeline
+** Pipeline layout
+- =uniform= are configured with =VkPipelineLayout=
+- uniforms are passed into pipeline layout when creating them.
+* Render passeS

@@ -55,7 +55,7 @@ private:
                       &swapChain, swapChainImages, swapChainImageFormat,
                       swapChainExtent);
     createImageViews();
-    Pipeline::create(device.get());
+    Pipeline::create(device.get(), swapChainExtent, pipelineLayout);
   }
 
   // Update the graphical elements.
@@ -68,6 +68,7 @@ private:
 
   // Free the allocated resources
   void clean() {
+    Pipeline::clean(device.get(), pipelineLayout);
     for (auto imageView : swapChainImageViews) {
       vkDestroyImageView(device.get(), imageView, nullptr);
     }
@@ -78,8 +79,6 @@ private:
     device.clean();
     vkDestroySurfaceKHR(instance, surface, nullptr);
     vkDestroyInstance(instance, nullptr);
-    vkDestroyShaderModule(device, fragShaderModule, nullptr);
-    vkDestroyShaderModule(device, vertShaderModule, nullptr);
     glfwDestroyWindow(window);
     glfwTerminate();
   }
@@ -190,6 +189,7 @@ private:
   std::vector<VkImageView> swapChainImageViews;
   VkFormat swapChainImageFormat;
   VkExtent2D swapChainExtent;
+  VkPipelineLayout pipelineLayout;
 };
 
 } // namespace App
