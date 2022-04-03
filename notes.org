@@ -307,3 +307,42 @@ struct VkSurfaceFormatKHR {
    - Requires renderpass
    - Image view as attachments.
    - width and height.
+* Command Buffers
+Vulkan can collect all the commands in command buffer and launch it together. Allows command rendering in multiple threads.
+** Command pools
+1. Command pools are required for command buffers.
+2. Responsible to manage memory for buffers and command buffers
+3. =VkCommandPool= stores the fool
+4. Command pool requires knowing the queue indices.
+5. it has two parameters =flags= and =queueFamilyIndex=.
+   - =VK_COMMAND_POOL_CREATE_TRANSIENT_BIT=: Hint that command buffers are rerecorded with new commands often (may change memory allocation behavior)
+   - =VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT=: Allow command buffers to be rerecorded individually, without this flag they all have to be reset together
+** Command Buffer allocation
+- Automatically freed when pools are destroyed.
+- =VkAllocateCommandBuffers= allocates the command buffers.
+- =level= specifies if allocated buffers are primary or secondary
+  * Primary are submitted for execution and can't be called from other buffers
+  * Secondary can't be submitted directly but be called from primary
+** Recording Command Buffers
+- It writes the command to execute into the command buffer.
+- Requires command buffer and index of image at the swap chain
+- Start bu creating record.
+- Can have:
+  * /One time submit/: Command buffer will be recorded after executing once.
+  * /render pass continue/: Secondary command buffer within a single render pass
+  * /simultaneous use/: Resubmit buffer while pending execution.
+** Starting Render pass
+- To draw one has to start renderpass.
+- renderPassInfo takes renderpass, framebuffer we created for storing swap chain image. It also needs to know the swap chain pixel offsets and extent.
+- =vkCmdBeginRenderPass= takes the command buffer and render pass info to create the renders.
+- Final command can be two options
+  * =VK_SUBPASS_CONTENTS_INLINE=
+  * =VK_SUBPASS_CONTENTS_SECONDARY_COMMAND_BUFFERS=
+** Drawing commands
+- Bind pipeline can take compute pipeline or the graphics pipeline! This means we can do compute in GPU simply by passing a pipeline that is responsible for performing heavy computation.
+- Draw is simple. Takes the following parameter.
+  * =vertexCount=: Even though we don't have a vertex buffer, we technically still have 3 vertices to draw.
+ * =instanceCount=: Used for instanced rendering, use 1 if you're not doing that.
+ * =firstVertex=: Used as an offset into the vertex buffer, defines the lowest value of =gl_VertexIndex=.
+ * =firstInstance=: Used as an offset for instanced rendering, defines the lowest value of =gl_InstanceIndex=.
+* Rendering

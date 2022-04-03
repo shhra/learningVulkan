@@ -2,6 +2,7 @@
 #define BASE_H_
 
 #include "buffers.hpp"
+#include "commands.hpp"
 #include "pipeline.hpp"
 #include "renderpass.hpp"
 #include "swapchain.hpp"
@@ -62,6 +63,9 @@ private:
                      graphicsPipeline);
     FrameBuffers::create(device.get(), renderPass, swapChainFramebuffers,
                          swapChainImageViews, swapChainExtent);
+    Commands::createPool(physicalDevice.get(), surface, device.get(),
+                         commandPool);
+    Commands::createBuffers(device.get(), commandPool, commandBuffer);
   }
 
   // Update the graphical elements.
@@ -69,11 +73,17 @@ private:
     // Make sure the window runs throughout the program
     while (!glfwWindowShouldClose(window)) {
       glfwPollEvents();
+      drawFrame();
     }
+  }
+
+  void drawFrame() {
+
   }
 
   // Free the allocated resources
   void clean() {
+    Commands::clean(device.get(), commandPool);
     FrameBuffers::clean(device.get(), swapChainFramebuffers);
     Pipeline::clean(device.get(), pipelineLayout, graphicsPipeline);
     RenderPass::clean(device.get(), renderPass);
@@ -193,6 +203,8 @@ private:
   VkSwapchainKHR swapChain;
   VkRenderPass renderPass;
   VkPipeline graphicsPipeline;
+  VkCommandPool commandPool;
+  VkCommandBuffer commandBuffer;
 
   // Swap chain related.
   std::vector<VkImage> swapChainImages;
