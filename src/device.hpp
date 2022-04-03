@@ -136,10 +136,12 @@ public:
     physicalDevice.instantiateLogical(createInfo, device);
 
     /* Get the queue */
-    vkGetDeviceQueue(device, indices.graphicsFamily.value(), 0, &presentQueue);
+    vkGetDeviceQueue(device, indices.presentFamily.value(), 0, &presentQueue);
+    vkGetDeviceQueue(device, indices.graphicsFamily.value(), 0, &graphicsQueue);
   }
 
   VkQueue &queue() { return this->presentQueue; }
+  VkQueue &gQueue() { return this->graphicsQueue; }
 
   void clean() { vkDestroyDevice(device, nullptr); }
 

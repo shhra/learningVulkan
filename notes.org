@@ -346,3 +346,66 @@ Vulkan can collect all the commands in command buffer and launch it together. Al
  * =firstVertex=: Used as an offset into the vertex buffer, defines the lowest value of =gl_VertexIndex=.
  * =firstInstance=: Used as an offset for instanced rendering, defines the lowest value of =gl_InstanceIndex=.
 * Rendering
+** Outline
+- Wait for previous frame to finish
+- Acquire image from swapchain
+- Record a command buffer
+- Submit the recorded buffer
+- Present the image
+** Synchronization
+- Explicit synchronization in GPU
+- Everything that runs in GPU is asynchronous
+- Major parts that require synchronization:
+  * Acquiring an image from swapchain
+  * Executing the commands
+  * Presenting that image and returning to swapchain
+** Semaphores
+- They deal with exclusive order between queue operations
+- Makes it possible to order within queue and between different queues.
+- Binary vs Timeline semaphore.
+- Semaphores can be signaled or un-signaled
+- Signal and wait type of semaphore.
+- A and B are two queues that require ordering. A signal semaphore S, and B waits for that semaphore.
+- After B completes semaphore is unsignaled.
+- The CPU will not waiting at this point. For that CPU needs Fence.
+** Fence
+- Signaled or unsignaled state.
+- As we submit work, we attach a Fence as we submit the queue. Now the process in CPU will wait for this fence.
+- Host doesn't require any blocking unless necessary.
+** Synchronization Objects
+- *Motivation*: To prevent overwriting the current frame with the next frame
+- Two semaphores and one face.
+** Fencing
+- In main draw loop we will have to wait for the fence.
+- it takes array of fences, and waits on host
+- =VK_TRUE= indicates to wait for all fences.
+- It also has timeout.
+- In current case, we wait for =inFlightFence= from the first block. Since there is no previous frame that is being run, we are blocked indefinitely.
+- Therefore we signal as we create it =fenceInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT;=
+** Acquiring image
+- First we acquire image from swapchain using =vkAcquiteNextImageKHR=.
+- We can specify timeout for the frame to be available.
+- We also need the synchronization objects.
+- Finally we also need imageIndex.
+** Recording commands
+- First we reset the command buffer
+- then we record it
+** Submit the command buffer
+- We have to create a =VkSubmitInfo=
+- First specify which semaphore to wait.
+- We wait at the writing colors stage.
+- We need to specify command buffers
+** Subpasses
+- Take care of image layout transitions
+- Controlled by subpass  dependencies.
+- Specify memory and execution dependencies
+- Two builtin dependencies that take care of transitions
+- =VkSubpassDependency=
+  * =VK_SUBPASS_EXTERNAL=: implicit subpass before or after render pass
+  * =dstSubpass= > =srcSubpass=.
+  * Other fields =srcStageMask= and =srcAccessMask= specify  the operations to wait on for and stages where this occur.
+  * All this makes it possible to prevent transitions until we want to write the colors.
+** Presentation
+- start by creating the present info. that waits for some signals.
+- It will then take the swap chain and specify the swap chain on which we want to render image on.
+- We can also check if individual swap chain was successful.
