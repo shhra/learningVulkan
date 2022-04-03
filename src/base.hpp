@@ -128,7 +128,6 @@ private:
     presentInfo.swapchainCount = 1;
     presentInfo.pSwapchains = swapChains;
     presentInfo.pImageIndices = &imageIndex;
-    presentInfo.pResults = nullptr; // Optional
 
     vkQueuePresentKHR(this->device.queue(), &presentInfo);
   }
