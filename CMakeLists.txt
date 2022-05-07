@@ -18,6 +18,7 @@ add_executable(graphics
     src/commands.hpp
     src/buffers.hpp
     src/pipeline.hpp
+    src/allocation.hpp
 )
 
 target_link_libraries(graphics glfw ${GLFW_LIBRARIES} vulkan ${VULKAN_LIBRARIES})

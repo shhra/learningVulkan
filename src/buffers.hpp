@@ -1,5 +1,9 @@
 #ifndef BUFFERS_H
 #define BUFFERS_H
+#include "allocation.hpp"
+#include "vertex.hpp"
+#include <cstdint>
+#include <cstring>
 #include <stdexcept>
 #include <vector>
 #include <vulkan/vulkan_core.h>
@@ -35,6 +39,50 @@ struct FrameBuffers {
     for (auto framebuffer : swapChainFramebuffers) {
       vkDestroyFramebuffer(device, framebuffer, nullptr);
     }
+  }
+};
+
+struct Buffers {
+  static VkBufferCreateInfo
+  create(const VkDevice &device, VkBuffer &vertexBuffer, uint32_t buffer_size) {
+    VkBufferCreateInfo bufferInfo{};
+    bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
+    bufferInfo.size = buffer_size;
+    bufferInfo.usage = VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
+    bufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+
+    if (vkCreateBuffer(device, &bufferInfo, nullptr, &vertexBuffer) !=
+        VK_SUCCESS) {
+      throw std::runtime_error("[VkVertexBuffer]: Lol, I don't have vertices. "
+                               "You want me to display a blank screen?!");
+    }
+
+    return bufferInfo;
+  }
+
+  static void clean(const VkDevice &device, const VkBuffer &buffer) {
+    vkDestroyBuffer(device, buffer, nullptr);
+  }
+};
+
+struct VertexBuffers {
+  static void create(const VkDevice &device,
+                     const VkPhysicalDevice &physicalDevice,
+                     VkBuffer &vertexBuffer, VkDeviceMemory vertexBufferMemory,
+                     const std::vector<Vertex>& vertices) {
+
+
+    auto buffer_size = sizeof(vertices[0]) * vertices.size();
+
+    auto bufferInfo = Buffers::create(device, vertexBuffer, buffer_size);
+    Allocation::allocate(device, physicalDevice, vertexBuffer,
+                         vertexBufferMemory);
+
+    // Map
+    void *data;
+    vkMapMemory(device, vertexBufferMemory, 0, bufferInfo.size, 0, &data);
+    mempcpy(data, vertices.data(), (size_t) bufferInfo.size);
+    vkUnmapMemory(device, vertexBufferMemory);
   }
 };
 

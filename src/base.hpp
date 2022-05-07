@@ -1,11 +1,13 @@
 #ifndef BASE_H_
 #define BASE_H_
 
+#include "allocation.hpp"
 #include "buffers.hpp"
 #include "commands.hpp"
 #include "pipeline.hpp"
 #include "renderpass.hpp"
 #include "swapchain.hpp"
+#include "vertex.hpp"
 #include <cstddef>
 #include <cstdint>
 #include <vector>
@@ -65,6 +67,8 @@ private:
                          swapChainImageViews, swapChainExtent);
     Commands::createPool(physicalDevice.get(), surface, device.get(),
                          commandPool);
+    VertexBuffers::create(device.get(), physicalDevice.get(), vertexBuffer,
+                          vertexBufferMemory, vertices);
     Commands::createBuffers(device.get(), commandPool, commandBuffer);
     createSyncObjects();
   }
@@ -77,7 +81,6 @@ private:
       drawFrame();
     }
     vkDeviceWaitIdle(device.get());
-
   }
 
   void drawFrame() {
@@ -90,8 +93,11 @@ private:
                           imageAvailableSemaphore, VK_NULL_HANDLE, &imageIndex);
 
     vkResetCommandBuffer(commandBuffer, 0);
-    Commands::record(commandBuffer, imageIndex, renderPass,
-                     swapChainFramebuffers, swapChainExtent, graphicsPipeline);
+    auto size = static_cast<uint32_t>(vertices.size());
+
+    Commands::record(commandBuffer, imageIndex, renderPass, vertexBuffer,
+                     swapChainFramebuffers, swapChainExtent, graphicsPipeline,
+                     size);
 
     /* Submit info */
     VkSubmitInfo submitInfo{};
@@ -148,6 +154,8 @@ private:
     if (enableValidationLayers) {
       Messages::destroyDebugMsgExt(instance, debugMessenger, nullptr);
     }
+    Buffers::clean(device.get(), vertexBuffer);
+    Allocation::free(device.get(), vertexBufferMemory);
     device.clean();
     vkDestroySurfaceKHR(instance, surface, nullptr);
     vkDestroyInstance(instance, nullptr);
@@ -279,6 +287,11 @@ private:
   VkSemaphore imageAvailableSemaphore;
   VkSemaphore renderFinishedSemaphore;
   VkFence inFlightFence;
+  VkBuffer vertexBuffer;
+  VkDeviceMemory vertexBufferMemory;
+
+  // Load object
+  const std::vector<Vertex> vertices = Triangle::create();
 
   // Swap chain related.
   std::vector<VkImage> swapChainImages;

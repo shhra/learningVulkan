@@ -1,7 +1,7 @@
 #+TITLE: Vulkan Notes
 #+STARTUP: overview
 
-* Glfw
+* GLFW
   * re-sizable isn't straightforward.
   * disable GL api call
 
@@ -216,7 +216,7 @@ struct VkSurfaceFormatKHR {
 5. Rasterization
 6. Fragment shader
 7. Color blending
-* Shaders
+* Shader
 1. Vulkan requires shader in SPIR-V format.
 2. Therefore, it will requires loading a binary.
 ** Shader Modules
@@ -409,3 +409,80 @@ Vulkan can collect all the commands in command buffer and launch it together. Al
 - start by creating the present info. that waits for some signals.
 - It will then take the swap chain and specify the swap chain on which we want to render image on.
 - We can also check if individual swap chain was successful.
+** Issues
+- Having to wait for previous frame to finish. Therefore we need to find a way to deal with this flaw.
+- Find something is that is different from the tutorial.
+- Also find a proper way to handle the window size that is different from the tutorial.
+- Ignore the window resize for now and continue working on whatever is being made.
+* Vertex Buffers: Vertex Input Description
+The approach starts with creating in CPU and moving to high performance memory.
+** Vertex Shader
+Now the shader takes the vertex using =in=. =dvec3= uses two slots. Therefore index is higher.
+- What is =layout(location = x)=?
+  + Layout qualifiers affect where the storage for a variable comes from.
+  + In case of vertex shader it specifies the attribute index that particular input uses.
+  + Fragment shader it will specify where the  data is written into.
+** Vertex Data
+- Takes in position and color.
+- Simply fill in the vertices.
+- Interleaving vertex attributes. -> It means combining different vertex element together
+** Binding Descriptions
+- To load the vertex data into the vertex shader, we will have to create a binding description
+- =VkVertexInputBindingDescription= describes the rate to load data from memory.
+  * Contains =num byes= between data entries
+  * Per instance or per vertex motion.
+  * =binding= index of the binding.
+  * =stride= no. of bytes between consecutive indices
+  * =inputRate=: =VK_VERTEX_INPUT_RATE_VERTEX= or =..._INSTANCE=.
+** Attribute description
+- Describes how to extract vertex attribute from the chunk of vertex data.
+- Depending on the attributes present for the vertex, there will be necessity of that many attribute description.
+- =binding= : Describes the binding number
+- =location= : Reference location derivative of shader
+- =format=: type of data. Implicitly defines the byte since the start of per-vetex data. Match format type with the input type
+- =offset=: Determines the num of bytes since the start of data read.
+** Attaching to the pipeline.
+Attach to =vertexInputInfo=
+#+begin_src c++
+auto bindDescription = Vertex::getBindingDescription();
+auto attrDescription = Vertex::getAttributeDescriptions();
+
+VkPipelineVertexInputStateCreateInfo vertexInputInfo{};
+vertexInputInfo.sType =
+  VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
+vertexInputInfo.vertexBindingDescriptionCount = 1;
+vertexInputInfo.vertexAttributeDescriptionCount =
+  static_cast<uint32_t>(attrDescription.size());
+vertexInputInfo.pVertexAttributeDescriptions = attrDescription.data();
+vertexInputInfo.pVertexBindingDescriptions = &bindDescription;
+#+end_src
+* Vertex Buffers: Creation
+- Buffers are regions within memory where data arbitrary data can be stored.
+- Creating a buffer is simply filling up =VkBufferCreateInfo= structure.
+- =size= : size of vertices in bytes
+- =usage= : Indicates the method for using data. It will be vertex buffer bit. But the same thing can be shared with different buffer.
+- =sharingMode= : how the data is shared among queue family.
+- =flags= : Configure sparse buffer memory. ?
+** Memory Requirements.
+- Creation isn't only enough for using the buffer. It needs to be assigned to some memory.
+- Therefore, =VkMemoryRequirements= specify the requirements for the buffer.
+- It allows selecting one of the multiple memories withing the GPU.
+- =size=: Required memory for the buffer in bytes
+- =alignment= : Offset from which the allocated buffer begins.
+- =memoryTypeBits=: Bit field suitable for the buffer.
+
+*** Find the memory type
+1. Use device memory properties to query for the memory.
+2. The memory properties has two arrays =memoryTypes= and =memoryHeaps=.
+   a. =heaps= for dedicated VRAM and swap space
+   b. =memoryTypes= consists =VkMemoryType= that specify the heap and properties of each type of memory.
+   c. =visible bit= vs =coherent bit=.
+3. =typeFilter= specifies the bit field of memory types that are suitable
+** Memory allocation
+** Filling the buffer
+- =vkMapMemory= allows to fill the vertex buffer. Access the memory of given size at given offset
+- Then =memcpy= the data.
+- =vkUnmapMemory= to finish copying.
+- Requires coherent memory or flushing to ensure mapping is successful
+** Binding the buffer.
+- Extend the record command buffer.

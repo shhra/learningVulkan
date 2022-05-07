@@ -1,6 +1,8 @@
 #ifndef PIPELINE_H_
 #define PIPELINE_H_
+#include "vertex.hpp"
 #include <cstddef>
+#include <cstdint>
 #include <filesystem>
 #include <fstream>
 #include <iostream>
@@ -30,11 +32,15 @@ struct Pipeline {
   static void create(const VkDevice &device, const VkExtent2D &swapChainExtent,
                      VkPipelineLayout &pipelineLayout, VkRenderPass &renderPass,
                      VkPipeline &graphicsPipeline) {
-    auto vertShaderCode = readFile(std::filesystem::path("../shaders/vert.spv"));
-    auto fragShaderCode = readFile(std::filesystem::path("../shaders/frag.spv"));
+    auto vertShaderCode =
+        readFile(std::filesystem::path("../shaders/vert.spv"));
+    auto fragShaderCode =
+        readFile(std::filesystem::path("../shaders/frag.spv"));
 
-    VkShaderModule vertShaderModule = createShaderModule(vertShaderCode, device);
-    VkShaderModule fragShaderModule = createShaderModule(fragShaderCode, device);
+    VkShaderModule vertShaderModule =
+        createShaderModule(vertShaderCode, device);
+    VkShaderModule fragShaderModule =
+        createShaderModule(fragShaderCode, device);
 
     VkPipelineShaderStageCreateInfo vertShaderStageInfo{};
     vertShaderStageInfo.sType =
@@ -53,11 +59,17 @@ struct Pipeline {
     VkPipelineShaderStageCreateInfo shaderStages[] = {vertShaderStageInfo,
                                                       fragShaderStageInfo};
 
+    auto bindDescription = Vertex::getBindingDescription();
+    auto attrDescription = Vertex::getAttributeDescriptions();
+
     VkPipelineVertexInputStateCreateInfo vertexInputInfo{};
     vertexInputInfo.sType =
         VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
-    vertexInputInfo.vertexBindingDescriptionCount = 0;
-    vertexInputInfo.vertexAttributeDescriptionCount = 0;
+    vertexInputInfo.vertexBindingDescriptionCount = 1;
+    vertexInputInfo.vertexAttributeDescriptionCount =
+        static_cast<uint32_t>(attrDescription.size());
+    vertexInputInfo.pVertexAttributeDescriptions = attrDescription.data();
+    vertexInputInfo.pVertexBindingDescriptions = &bindDescription;
 
     VkPipelineInputAssemblyStateCreateInfo inputAssembly{};
     inputAssembly.sType =
