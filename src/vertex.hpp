@@ -44,8 +44,8 @@ struct Vertex {
 struct Triangle {
   static std::vector<Vertex> create() {
     std::vector<Vertex> vertices = {
-      {{0.0f, -0.5f}, {1.0f, 0.0f, 0.0f}},
-      {{0.5f, 0.5f}, {0.0f, 1.0f, 0.0f}},
+      {{0.0f, -0.5f}, {0.1f, 1.0f, 1.0f}},
+      {{0.5f, 0.5f}, {1.0f, 0.0f, 0.0f}},
       {{-0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}}
     };
     return vertices;

@@ -68,7 +68,7 @@ private:
     Commands::createPool(physicalDevice.get(), surface, device.get(),
                          commandPool);
     VertexBuffers::create(device.get(), physicalDevice.get(), vertexBuffer,
-                          vertexBufferMemory, vertices);
+                          vertexBufferMemory, vertices, data);
     Commands::createBuffers(device.get(), commandPool, commandBuffer);
     createSyncObjects();
   }
@@ -143,6 +143,7 @@ private:
     vkDestroySemaphore(device.get(), imageAvailableSemaphore, nullptr);
     vkDestroySemaphore(device.get(), renderFinishedSemaphore, nullptr);
     vkDestroyFence(device.get(), inFlightFence, nullptr);
+
     Commands::clean(device.get(), commandPool);
     FrameBuffers::clean(device.get(), swapChainFramebuffers);
     Pipeline::clean(device.get(), pipelineLayout, graphicsPipeline);
@@ -151,11 +152,11 @@ private:
       vkDestroyImageView(device.get(), imageView, nullptr);
     }
     vkDestroySwapchainKHR(device.get(), swapChain, nullptr);
+    Buffers::clean(device.get(), vertexBuffer);
+    Allocation::free(device.get(), vertexBufferMemory);
     if (enableValidationLayers) {
       Messages::destroyDebugMsgExt(instance, debugMessenger, nullptr);
     }
-    Buffers::clean(device.get(), vertexBuffer);
-    Allocation::free(device.get(), vertexBufferMemory);
     device.clean();
     vkDestroySurfaceKHR(instance, surface, nullptr);
     vkDestroyInstance(instance, nullptr);
@@ -292,6 +293,9 @@ private:
 
   // Load object
   const std::vector<Vertex> vertices = Triangle::create();
+
+  // Map
+  void *data;
 
   // Swap chain related.
   std::vector<VkImage> swapChainImages;

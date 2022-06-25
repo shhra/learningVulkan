@@ -68,20 +68,20 @@ struct Buffers {
 struct VertexBuffers {
   static void create(const VkDevice &device,
                      const VkPhysicalDevice &physicalDevice,
-                     VkBuffer &vertexBuffer, VkDeviceMemory vertexBufferMemory,
-                     const std::vector<Vertex>& vertices) {
+                     VkBuffer &vertexBuffer, VkDeviceMemory &vertexBufferMemory,
+                     const std::vector<Vertex> &vertices, void* data) {
+
+    // Staging buffer.
 
 
+    // Vertex buffer is here.
     auto buffer_size = sizeof(vertices[0]) * vertices.size();
-
     auto bufferInfo = Buffers::create(device, vertexBuffer, buffer_size);
     Allocation::allocate(device, physicalDevice, vertexBuffer,
                          vertexBufferMemory);
 
-    // Map
-    void *data;
     vkMapMemory(device, vertexBufferMemory, 0, bufferInfo.size, 0, &data);
-    mempcpy(data, vertices.data(), (size_t) bufferInfo.size);
+    mempcpy(data, vertices.data(), (size_t)bufferInfo.size);
     vkUnmapMemory(device, vertexBufferMemory);
   }
 };
