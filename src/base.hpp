@@ -68,7 +68,8 @@ private:
     Commands::createPool(physicalDevice.get(), surface, device.get(),
                          commandPool);
     VertexBuffers::create(device.get(), physicalDevice.get(), vertexBuffer,
-                          vertexBufferMemory, vertices, data);
+                          vertexBufferMemory, vertices, data, commandPool,
+                          device.gQueue());
     Commands::createBuffers(device.get(), commandPool, commandBuffer);
     createSyncObjects();
   }

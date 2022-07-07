@@ -486,3 +486,19 @@ vertexInputInfo.pVertexBindingDescriptions = &bindDescription;
 - Requires coherent memory or flushing to ensure mapping is successful
 ** Binding the buffer.
 - Extend the record command buffer.
+* Staging Buffer
+1. =VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT= is where the optimal memory lies in
+** Transfer Queue
+a. Buffer copy command requires a  queue family that supports transfer operations. -- =VK_QUEUE_TRANSFER_BIT=.
+b. There is a good exercise in the reference. Check it out later.
+** Steps
+1. Allocate staging buffer
+2. Allocate vertexBuffer
+3. Copy the buffers
+   - Allocation command buffer info
+   - Allocation command buffer
+   - Record the command buffer
+   - Create a begin info
+   - Create a copy region.
+   - Submit it to the queue
+   - Free the command buffer.

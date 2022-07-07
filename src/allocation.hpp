@@ -28,7 +28,8 @@ struct Allocation {
 
   static void allocate(const VkDevice &device,
                        const VkPhysicalDevice &physicalDevice, VkBuffer &buffer,
-                       VkDeviceMemory &vertexBufferMemory) {
+                       VkDeviceMemory &bufferMemory,
+                       VkMemoryPropertyFlags properties) {
     // Memory Related
     VkMemoryRequirements memRequirements;
     vkGetBufferMemoryRequirements(device, buffer, &memRequirements);
@@ -37,21 +38,19 @@ struct Allocation {
 
     allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
     allocInfo.allocationSize = memRequirements.size;
-    allocInfo.memoryTypeIndex =
-        findMemoryType(physicalDevice, memRequirements.memoryTypeBits,
-                       VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
-                           VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+    allocInfo.memoryTypeIndex = findMemoryType(
+        physicalDevice, memRequirements.memoryTypeBits, properties);
 
-    if (vkAllocateMemory(device, &allocInfo, nullptr, &vertexBufferMemory) !=
+    if (vkAllocateMemory(device, &allocInfo, nullptr, &bufferMemory) !=
         VK_SUCCESS) {
       throw std::runtime_error(
           "[VkMemory]: Oh boy, I can't allocate my memory!");
     }
-    vkBindBufferMemory(device, buffer, vertexBufferMemory, 0);
+    vkBindBufferMemory(device, buffer, bufferMemory, 0);
   }
 
-  static void free(const VkDevice &device, VkDeviceMemory &vertexBufferMemory) {
-    vkFreeMemory(device, vertexBufferMemory, nullptr);
+  static void free(const VkDevice &device, VkDeviceMemory &bufferMemory) {
+    vkFreeMemory(device, bufferMemory, nullptr);
   }
 };
 
