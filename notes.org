@@ -502,3 +502,15 @@ b. There is a good exercise in the reference. Check it out later.
    - Create a copy region.
    - Submit it to the queue
    - Free the command buffer.
+* Vulkan makes it easy to debug.
+Example:
+#+begin_src c++
+Object 0: handle = 0x55d17caa4650, type = VK_OBJECT_TYPE_DEVICE; | MessageID = 0x417b9644 | vkAllocateCommandBuffers: parameter pAllocateInfo->commandBufferCount must be greater than 0.
+#+end_src
+It says that =vkAllocateCommandBuffers= is having a issue. And to be more specific, the pAllocateInfo. To debug this simply go and seek =allocInfo=!
+* Index buffer
+- Indices: Simple vector of integers that holds the indices of the data.
+** Creation
+- It's very straight forward once all the initial setup is done.
+- It looks like re-using vertex buffer.
+- The major difference occurs when we draw the vertics. Instead of simple command, we will now use indexed command.

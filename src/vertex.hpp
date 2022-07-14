@@ -3,9 +3,10 @@
 
 #include <array>
 #include <cstddef>
+#include <cstdint>
 #include <glm/glm.hpp>
-#include <vulkan/vulkan.hpp>
 #include <vector>
+#include <vulkan/vulkan.hpp>
 #include <vulkan/vulkan_core.h>
 
 struct Vertex {
@@ -21,8 +22,8 @@ struct Vertex {
     return bindingDescription;
   }
 
-
-  static std::array<VkVertexInputAttributeDescription, 2> getAttributeDescriptions() {
+  static std::array<VkVertexInputAttributeDescription, 2>
+  getAttributeDescriptions() {
     std::array<VkVertexInputAttributeDescription, 2> attributeDescriptions{};
 
     /* Position data */
@@ -41,16 +42,16 @@ struct Vertex {
   }
 };
 
-struct Triangle {
+struct Shape {
   static std::vector<Vertex> create() {
-    std::vector<Vertex> vertices = {
-      {{0.0f, -0.5f}, {0.1f, 1.0f, 1.0f}},
-      {{0.5f, 0.5f}, {1.0f, 0.0f, 0.0f}},
-      {{-0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}}
-    };
+    std::vector<Vertex> vertices = {{{-0.5f, -0.5f}, {0.1f, 1.0f, 1.0f}},
+                                    {{0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}},
+                                    {{0.5f, 0.5f}, {1.0f, 0.0f, 0.0f}},
+                                    {{-0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}}};
     return vertices;
   }
 
+  static std::vector<std::uint16_t> indices() { return {0, 1, 2, 2, 3, 0}; }
 };
 
 #endif // VERTEX_H_

@@ -46,10 +46,12 @@ struct Commands {
   static void record(const VkCommandBuffer &commandBuffer, uint32_t imageIndex,
                      const VkRenderPass &renderPass,
                      const VkBuffer &vertexBuffer,
+                     const VkBuffer &indexBuffer,
                      const std::vector<VkFramebuffer> &swapChainFramebuffers,
                      const VkExtent2D &swapChainExtent,
                      const VkPipeline &graphicsPipeline,
-                     uint32_t size
+                     uint32_t size,
+                     uint32_t indices_size
     ) {
 
     VkCommandBufferBeginInfo beginInfo{};
@@ -80,7 +82,8 @@ struct Commands {
       VkBuffer vertexBuffers[] = {vertexBuffer};
       VkDeviceSize offsets[] = {0};
       vkCmdBindVertexBuffers(commandBuffer, 0, 1, vertexBuffers, offsets);
-      vkCmdDraw(commandBuffer, size, 1, 0, 0);
+      vkCmdBindIndexBuffer(commandBuffer, indexBuffer, 0, VK_INDEX_TYPE_UINT16);
+      vkCmdDrawIndexed(commandBuffer, indices_size, 1, 0, 0, 0);
     vkCmdEndRenderPass(commandBuffer);
     if (vkEndCommandBuffer(commandBuffer) != VK_SUCCESS) {
       throw std::runtime_error(

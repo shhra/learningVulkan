@@ -70,6 +70,9 @@ private:
     VertexBuffers::create(device.get(), physicalDevice.get(), vertexBuffer,
                           vertexBufferMemory, vertices, data, commandPool,
                           device.gQueue());
+    IndexBuffers::create(device.get(), physicalDevice.get(), indexBuffer,
+                          indexBufferMemory, indices, index_data, commandPool,
+                          device.gQueue());
     Commands::createBuffers(device.get(), commandPool, commandBuffer);
     createSyncObjects();
   }
@@ -96,9 +99,9 @@ private:
     vkResetCommandBuffer(commandBuffer, 0);
     auto size = static_cast<uint32_t>(vertices.size());
 
-    Commands::record(commandBuffer, imageIndex, renderPass, vertexBuffer,
+    Commands::record(commandBuffer, imageIndex, renderPass, vertexBuffer, indexBuffer,
                      swapChainFramebuffers, swapChainExtent, graphicsPipeline,
-                     size);
+                     size, static_cast<uint32_t>(indices.size()));
 
     /* Submit info */
     VkSubmitInfo submitInfo{};
@@ -153,8 +156,12 @@ private:
       vkDestroyImageView(device.get(), imageView, nullptr);
     }
     vkDestroySwapchainKHR(device.get(), swapChain, nullptr);
+    Buffers::clean(device.get(), indexBuffer);
+    Allocation::free(device.get(), indexBufferMemory);
+
     Buffers::clean(device.get(), vertexBuffer);
     Allocation::free(device.get(), vertexBufferMemory);
+
     if (enableValidationLayers) {
       Messages::destroyDebugMsgExt(instance, debugMessenger, nullptr);
     }
@@ -291,12 +298,16 @@ private:
   VkFence inFlightFence;
   VkBuffer vertexBuffer;
   VkDeviceMemory vertexBufferMemory;
+  VkBuffer indexBuffer;
+  VkDeviceMemory indexBufferMemory;
 
   // Load object
-  const std::vector<Vertex> vertices = Triangle::create();
+  const std::vector<Vertex> vertices = Shape::create();
+  const std::vector<std::uint16_t> indices = Shape::indices();
 
   // Map
   void *data;
+  void *index_data;
 
   // Swap chain related.
   std::vector<VkImage> swapChainImages;

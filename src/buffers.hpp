@@ -140,4 +140,44 @@ struct VertexBuffers {
   }
 };
 
+struct IndexBuffers {
+  static void create(const VkDevice &device,
+                     const VkPhysicalDevice &physicalDevice,
+                     VkBuffer &indexBuffer, VkDeviceMemory &indexBufferMemory,
+                     const std::vector<std::uint16_t> &indices, void *data,
+                     const VkCommandPool &commandPool,
+                     const VkQueue &graphicsQueue) {
+
+    VkDeviceSize buffer_size = sizeof(indices[0]) * indices.size();
+
+    VkBuffer stagingBuffer;
+    VkDeviceMemory stagingBufferMemory;
+    auto stagingBufferInfo = Buffers::create(device, stagingBuffer, buffer_size,
+                                             VK_BUFFER_USAGE_TRANSFER_SRC_BIT);
+    Allocation::allocate(device, physicalDevice, stagingBuffer,
+                         stagingBufferMemory,
+                         (VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
+                          VK_MEMORY_PROPERTY_HOST_COHERENT_BIT));
+
+    vkMapMemory(device, stagingBufferMemory, 0, buffer_size, 0, &data);
+    mempcpy(data, indices.data(), (size_t)buffer_size);
+    vkUnmapMemory(device, stagingBufferMemory);
+
+
+    auto bufferInfo = Buffers::create(device, indexBuffer, buffer_size,
+                                      VK_BUFFER_USAGE_INDEX_BUFFER_BIT |
+                                          VK_BUFFER_USAGE_TRANSFER_DST_BIT);
+    Allocation::allocate(device, physicalDevice, indexBuffer,
+                         indexBufferMemory,
+                         VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+
+    VertexBuffers::copy(stagingBuffer, indexBuffer, buffer_size, commandPool, device, graphicsQueue);
+
+    // Then destory the staging buffers.
+    vkDestroyBuffer(device, stagingBuffer, nullptr);
+    vkFreeMemory(device, stagingBufferMemory, nullptr);
+
+  }
+};
+
 #endif /* BUFFERS_H */
